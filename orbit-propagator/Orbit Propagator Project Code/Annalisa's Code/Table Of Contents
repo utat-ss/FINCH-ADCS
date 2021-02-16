@@ -1,3 +1,10 @@
 Code by Annalisa Cognigni for Orbit Propagator Project
 
 Files:
+1. Orbit_grapher_ver1.py - Plots elliptical orbit based on direct equations (Task 1).
+2. simple_harmonic_osc_ver1.py - Plots motion of spring (to test numerical solvers).
+3. jan9_orbit_propagator_ver2.1.py - Plots orbit by integration of the ODE given by the two body problem (Task 2).
+4. convert_to_vectors2.py - Imported file for above program.
+5. Orbit_Grapher_j2 - Accounts for J2 perturbation by integration of equations for change in orbital parameters.
+6. Encke_method.py - Plots orbit with J2 perturbation and graphs change in orbital parameters over time (Task 3).
+7. convert_to_vectors2_copy.py - Imported file for above program.
