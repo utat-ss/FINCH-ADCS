@@ -1,0 +1,246 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.integrate import odeint
+
+class Orbit():
+    def __init__(self,eccentricity, semi_maj_axis, inclination, raan, periapsis, t0, time_step, duration):
+
+        self.num_of_steps=(duration-t0)//time_step
+        self.velocity=np.zeros((self.num_of_steps,3))
+        self.position=np.zeros((self.num_of_steps,3))
+
+        self.time_array=np.linspace(t0,duration,self.num_of_steps)
+
+        self.e=eccentricity
+        self.a=semi_maj_axis
+        self.i=inclination
+
+        #Will change due to J2
+        self.raan=raan
+        self.w=periapsis
+
+        self.y0=np.array([self.raan,
+                          self.w])
+
+
+        self.G=6.67408*(10**-20)
+        self.mass_earth=5.972*(10**24)
+        self.rad=6371 #km
+        self.mu=self.G*self.mass_earth
+        self.J2=1.083*(10**(-3))
+        self.J4=-1.649*(10**(-6))
+
+        self.geo_to_perifocal = np.zeros((3,3))
+        self.perifocal_to_geo = np.zeros((3,3))
+
+
+    def get_rot_matrices(self):
+        ###Euler Angles
+        C3_w=np.array([[np.cos(self.w),  np.sin(self.w), 0],
+                          [-np.sin(self.w),  np.cos(self.w), 0],
+                          [0,            0,          1]])
+
+        C1_i=np.array([[1,     0,           0],
+                          [0,     np.cos(self.i),  np.sin(self.i)],
+                          [0,     -np.sin(self.i), np.cos(self.i)]])
+
+        C3_omega=np.array([[np.cos(self.raan),  np.sin(self.raan), 0],
+                          [-np.sin(self.raan),  np.cos(self.raan), 0],
+                          [0,            0,          1]])
+        t=np.matmul(C3_w, C1_i)
+        self.geo_to_perifocal = np.matmul(t,C3_omega)
+        self.perifocal_to_geo = np.linalg.inv(self.geo_to_perifocal)
+        return True
+
+    def euler_method(self, est, e, M, acc):
+        while True:
+            g_est= est-e*np.sin(est)-M
+            g_prime_est=1-e*np.cos(est)
+            new_est=est-(g_est)/(g_prime_est)
+            if (np.abs(new_est-est)<acc):
+                return new_est
+            else:
+                est=new_est
+
+    def get_eccentric_anomaly(self,time_passed):
+        # M = E - e*sin(E)
+        M = np.sqrt(self.mu/self.a**3)*(time_passed)
+        E= self.euler_method(M, self.e, M, 0.0001)
+        return E
+
+
+    def get_true_anomaly(self, E):
+        theta = 2*np.arctan(np.sqrt((1+self.e)/1-self.e)*np.tan(E/2))
+        return theta
+
+    def get_distance(self, theta):
+        l = self.a*(1-self.e**2)
+        r = l/(1+self.e*np.cos(theta))
+        return r
+
+    def get_next_pos_vector(self, r, theta):
+        r_vector = np.matmul(self.perifocal_to_geo,([r*np.cos(theta), r*np.sin(theta), 0]))
+        return r_vector
+
+    def get_next_velocity_vector(self, theta):
+
+        b=np.sqrt(self.mu/(self.a*(1-self.e**2)))
+        a=[-np.sin(theta)*b, (np.cos(theta)+self.e)*b, 0]
+        v_vector = np.matmul(self.perifocal_to_geo,a)
+        return v_vector
+
+    def concat(self, pos_vector):
+        self.position = np.append(self.position, pos_vector)
+        return True
+
+################ J2 ######################
+    def get_J2(self, y, t):
+        p=self.a*(1-(self.e ** 2))
+        n=np.sqrt(self.mu/(self.a**3))
+        print(n)
+        print(p)
+        print("muu")
+        print(self.mu)
+
+        rt1=(((-3)*(self.J2)*((self.rad)**2)*n*np.cos(self.i))/(2*(p**2)))
+        rt2= ((3 * ((self.J2) ** 2) * ((self.rad) ** 4) * n * np.cos(self.i)) / (32 * (p ** 4))) * (12 - 4*((self.e) ** 2) - (80 + 15 * ((self.e) ** 2)) * (np.sin(self.i)) ** 2)
+        rt3=((15*(self.J4)*((self.rad)**4)*n*np.cos(self.i))/(32*(p**4)))*(8+12*((self.e)**2)-(14+21*((self.e)**2))*((np.sin(self.i))**2))
+        raan_deriv = rt1 +rt2 +rt3
+        print("RAAN")
+
+        print(rt1)
+        print(rt2)
+        print(rt3)
+
+        pt1=((3*(self.J2)*((self.rad)**2)*n)/(4*(p**2)))*(4-5*((np.sin(self.i))**2))
+        pt2=((9*n*((self.J2)**2)*((self.rad)**4))/(384*(p**4))) * (56*((self.e)**2)+(760-36*(self.e**2))*((np.sin(self.i))**2)-(890+45*(self.e**2))*(np.sin(self.i))**4)
+        pt3=(((-15)*(self.J4)*((self.rad)**4)*n)/(128*(p**4)))*(64+72*((self.e)**2)-(248+252*(self.e**2))*((np.sin(self.i))**2)+(196+189*(self.e**2))*((np.sin(self.i))**4))
+
+        periapsis_deriv = pt1 +pt2 +pt3
+        print("total")
+        print(periapsis_deriv)
+        print(raan_deriv)
+
+
+        matrix=np.array([raan_deriv,
+                         periapsis_deriv])
+        return matrix
+
+##########################################
+
+    def plot_position(self, x, y, z):
+        testing_plot = plt.figure()
+        l=len(x)
+
+        ########EARTH
+        rho = self.rad  # radius of earth
+        theta = np.linspace(0, 2 * np.pi, l)
+        phi = np.linspace(0, np.pi, l)
+
+        a = rho * np.outer(np.cos(theta), np.sin(phi))
+        b = rho * np.outer(np.sin(theta), np.sin(phi))
+        c = rho * np.outer(np.ones(l), np.cos(phi))
+
+        earth = testing_plot.add_subplot(1,2,1, projection='3d')
+        earth.plot_surface(a, b, c)
+
+        #########PLOT DATA
+        earth.scatter(x, y, z, c='red', linestyle='-')
+        earth.set_title('Satellite Position')
+        zoom=9000
+        earth.set(xlim=(-zoom, zoom), ylim=(-zoom, zoom), zlim=(-zoom, zoom))
+
+
+
+
+
+        velocity = testing_plot.add_subplot(1,2,2)
+        speed=np.sqrt((np.abs(self.velocity[:,0]))**2+(np.abs(self.velocity[:,1]))**2+(np.abs(self.velocity[:,2]))**2)
+        velocity.plot(speed)
+        velocity.set_title('Satellite Speed')
+        velocity.set_xlabel('Time step')
+        velocity.set_ylabel('Speed (km/s)')
+
+        plt.show()
+        return True
+
+def plot_orbit_trajectory(eccentricity, semi_maj_axis, inclination, raan, periapsis, t0, time_step, duration):
+    orbit=Orbit(eccentricity, semi_maj_axis, inclination, raan, periapsis, t0, time_step, duration)
+    i=0
+
+    J2_effects=odeint(orbit.get_J2,orbit.y0,orbit.time_array)
+    print(J2_effects)
+
+    plt_2=plt.figure()
+    orb_param1 = plt_2.add_subplot(1, 2, 2)
+    orb_param1.plot(J2_effects[:, 0])  # raan
+
+
+    orb_param2 = plt_2.add_subplot(1, 2, 2)
+    orb_param2.plot(J2_effects[:, 1])  # periapsis
+
+    plt_2.legend(['raan', 'periapsis'])
+
+
+    for i in range(len(orbit.time_array)):
+
+        ############## J2 Perturbations ################
+        orbit.raan=J2_effects[i,0]
+
+        orbit.w=J2_effects[i,1]
+
+
+        orbit.get_rot_matrices()
+
+        time_passed=orbit.time_array[i]-orbit.time_array[0]
+
+        E=orbit.get_eccentric_anomaly(time_passed)
+        theta=orbit.get_true_anomaly(E)
+        r=orbit.get_distance(theta)
+
+        r_vector=orbit.get_next_pos_vector(r, theta)
+
+        v_vector=orbit.get_next_velocity_vector(theta)
+
+        orbit.position[i, 0] = r_vector[0]
+        orbit.position[i, 1] = r_vector[1]
+        orbit.position[i, 2] = r_vector[2]
+
+        orbit.velocity[i, 0] = v_vector[0]
+        orbit.velocity[i, 1] = v_vector[1]
+        orbit.velocity[i, 2] = v_vector[2]
+
+
+    print('############POSITION#############')
+    print(orbit.position)
+
+    print('############VELOCITY#############')
+    print(orbit.velocity)
+
+    x=orbit.position[:,0]
+    y=orbit.position[:,1]
+    z=orbit.position[:,2]
+
+    orbit.plot_position(x,y,z)
+
+    return True
+
+yr=int((365*24*60*60)//12)
+x=np.radians(97.4)
+y=np.radians(229.5)
+
+RUN=plot_orbit_trajectory(0.007, 6920, x, y, 0, 0, 10000, yr)
+
+
+"""
+Resources:
+[1] https://matplotlib.org/gallery/mplot3d/scatter3d.html#sphx-glr-gallery-mplot3d-scatter3d-py
+[2] https://matplotlib.org/gallery/mplot3d/surface3d_2.html#sphx-glr-gallery-mplot3d-surface3d-2-py
+[3] Spacecraft Dynamics and Control
+[4] Course Notes
+[5] http://www.bogan.ca/orbits/kepler/keplerex.html
+[6] https://www.school-for-champions.com/science/gravitation_universal_equation.htm#.XzyR8S0ZPUp
+[7] https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
+[8] http://adsabs.harvard.edu/full/1964PASJ...16..263K
+
+"""
