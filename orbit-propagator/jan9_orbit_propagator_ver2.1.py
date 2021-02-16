@@ -65,7 +65,7 @@ def orbit_propagator(t_int, mu, r0, v0):
         return x_double_dot  # x'=[v, a]
     #x'=Ax
 
-    data=solve_ivp(ode,[t0,t_int],initial_conditions,'LSODA',t_list) #integrate the equation defined above
+    data=solve_ivp(ode,[t0,t_int],initial_conditions,'DOP853',t_list) #integrate the equation defined above
 
     print('##### DATA #############')
     print(data)
