@@ -10,7 +10,7 @@ Time is an important fundamental dimension, especially in astrodynamics where hi
 
 Universal time (UT) is evaluated using the Earth's rotation, which varies over time. UT approximates mean solar time over Greenwich, so that the mean sun is directly on the meridian at 12h00. To enable this, each second in this standard shrinks and grows so that each mean solar day is equal to 86400 UT seconds. Thus each UT second is **not** necessarily equal to a SI second. 
 
-There are a number of realizations to UT. UT1 accounts for variations in the Earth's rotation due to polar motion, while UT0 does not. UTC which is the basis of civil time and found on everyday clocks. It is a convenient approximation to UT1 and their offset $\Delta t = t_{ut1} - t_{utc}$ is at most offset by $\pm0.9$ s.
+There are a number of realizations to UT. UT1 accounts for variations in the Earth's rotation due to polar motion, while UT0 does not. UTC which is the basis of civil time and found on everyday clocks. It is a convenient approximation to UT1 and their offset $$\Delta t = t_{ut1} - t_{utc}$$ is at most offset by $\pm0.9$ s.
 
 ### Terrestrial Time (TT)
 
