@@ -1,4 +1,4 @@
-# Contributing
+# Contributing (Borrow for 1 day)
 
 `ACS Toolbox` is largely a private effort by experienced Guidance, Navigation and Control (GNC)engineers to make low-precision GNC tools available for junior engineers, academia and the general public.
 The development and maintenance is sponsored by Astris Aerospace Inc.
