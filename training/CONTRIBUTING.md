@@ -43,7 +43,7 @@ Only the latter is outlined below.
 The following steps outline how to push a new PR to the `ACS Toolbox` repository for review and approval. 
 Your system will require the [desktop Github application](https://desktop.github.com/) to be installed on your machine and a consistent internet connection.
 
-1. Fork the `ACS Toolbox` repository from your browser while logged into your Github account.
+1. Fork the `ADCS repo` repository from your browser while logged into your Github account.
 2. Give the forked repository a name and description and click `Create fork` in your browser.
 3. In the Github desktop application, select the forked repository under the `Current repository` dropdown menu to perform a local checkout.
 4. In the desktop application, select `New branch` under the `Current branch` dropdown menu.
