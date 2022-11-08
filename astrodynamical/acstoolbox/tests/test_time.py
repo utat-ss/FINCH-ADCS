@@ -124,3 +124,6 @@ def test_dut1_from_gregorian():
     dUT1_s = (-0.1005632 - 0.1001852) / 2.0  # MJD of 59662.5.
 
     assert clock.GetdUT1fromGregorian(epoch_gregorian) == dUT1_s
+
+if __name__ == "__main__":
+
