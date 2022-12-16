@@ -1,7 +1,7 @@
 function[r_moon] = Lunargravity(jd)
 % Calculates the geocentric position of the moon 
 % Reference : Howard Curtis, Chp 12. pages 707 - 708
-
+% Moon Vector
 RE = 6378100; % in m
 
 T = (jd - 2451545.0)/36525; % Number of julian centuries since J2000
@@ -26,7 +26,7 @@ hpar =0.9508 ...
 + 0.0078*cos(235.7 + 890534.22*T) + 0.0028*cos(269.9 + 954397.74*T);
 h_par = mod(hpar,360);
 
-%...Direction cosines of the moon’s geocentric equatorial position vector:
+%...Direction cosines of the moonâ€™s geocentric equatorial position vector:
 l = cos(e_lat) * cos(e_long);
 m = cos(e)*cos(e_lat)*sin(e_long) - sin(e)*sin(e_lat);
 n = sin(e)*cos(e_lat)*sin(e_long) + cos(e)*sin(e_lat);
@@ -34,7 +34,7 @@ n = sin(e)*cos(e_lat)*sin(e_long) + cos(e)*sin(e_lat);
 %...Earth-moon distance (km):
 dist = RE/sin(h_par);
 
-%...Moon’s geocentric equatorial position vector (km):
+%...Moonâ€™s geocentric equatorial position vector (km):
 r_moon = dist*[l;m;n];
 
 end
