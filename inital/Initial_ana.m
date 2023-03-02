@@ -4,7 +4,7 @@ h = 500000; % height above ground m
 mu_E = 3.986e14; % Earth’s gravitational constant unit m^3/s^2
 arcsec = 3600;
 R_E = 6378.1363*1000; % in m
-nf = 4; %assuming fmc factor is 4
+nf = 4; %assuming FMC factor is 4
 
  % FINCH satellite velocity
 disp("angular distance (arcsec)");
