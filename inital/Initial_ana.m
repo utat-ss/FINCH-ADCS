@@ -1,5 +1,5 @@
 % inital ADCS analysis.
-GSD = 8.25; % Ground sampling distance
+GSD = 82.5; % Ground sampling distance
 h = 500000; % height above ground m
 mu_E = 3.986e14; % Earth’s gravitational constant unit m^3/s^2
 arcsec = 3600;
@@ -25,6 +25,6 @@ vg_eff = vg/nf;
 % exposure time
 t_exp = GSD/vg_eff;
 
-disp("exposure time for an 8.25m by 8.25m ground pixel is");
+fprintf("exposure time for %4.2f meters in seconds \n", GSD);
 disp(t_exp);
  
